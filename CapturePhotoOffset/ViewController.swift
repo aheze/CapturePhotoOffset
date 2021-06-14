@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var previewView: PreviewView!
     @IBOutlet weak var outputImageView: UIImageView!
     
-    var captured = false
+    var captured = false /// true if showing image view
     @IBAction func capturePressed(_ sender: Any) {
         captured.toggle()
         
@@ -29,7 +29,6 @@ class ViewController: UIViewController {
     }
     
     let avSession = AVCaptureSession()
-    let videoDataOutput = AVCaptureVideoDataOutput()
     let photoOutput = AVCapturePhotoOutput()
     
     override func viewDidLoad() {
@@ -43,23 +42,23 @@ class ViewController: UIViewController {
                 avSession.addInput(captureDeviceInput)
                 avSession.sessionPreset = .photo
             }
+            if avSession.canAddOutput(photoOutput) {
+                avSession.addOutput(photoOutput)
+            }
         } catch {
             print("Error: \(error)")
-        }
-        
-        if avSession.canAddOutput(photoOutput) {
-            avSession.addOutput(photoOutput)
         }
         
         previewView.videoPreviewLayer.frame = view.layer.bounds
         previewView.videoPreviewLayer.videoGravity = .resizeAspectFill
         previewView.session = self.avSession
         
-        avSession.startRunning()
-        outputImageView.alpha = 0
+        avSession.startRunning() /// start the session
+        outputImageView.alpha = 0 /// hide image view
     }
 }
 
+/// get the image from `capturePhoto`
 extension ViewController: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let imageData = photo.fileDataRepresentation() {
